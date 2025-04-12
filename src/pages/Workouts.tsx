@@ -1,11 +1,9 @@
+
 import React, { useState } from "react";
 import { useWorkout, Workout } from "@/contexts/WorkoutContext";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,116 +14,65 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { 
-  Pencil, 
-  Trash, 
   MoreVertical, 
-  Calendar, 
+  Calendar as CalendarIcon, 
   Clock, 
-  Flame, 
-  Search, 
-  Dumbbell, 
-  PlusCircle 
+  Dumbbell,
+  PlusCircle,
+  ChevronLeft, 
+  ChevronRight
 } from "lucide-react";
-import { format, parseISO, isToday, isThisWeek, isThisMonth } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { format, parseISO, isToday } from "date-fns";
 import WorkoutForm from "@/components/WorkoutForm";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 const Workouts = () => {
   const { workouts, deleteWorkout } = useWorkout();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const filteredWorkouts = workouts
-    .filter(
-      (workout) =>
-        workout.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        workout.description.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-  const todayWorkouts = filteredWorkouts.filter((workout) =>
-    isToday(parseISO(workout.date))
-  );
-  
-  const thisWeekWorkouts = filteredWorkouts.filter(
-    (workout) => isThisWeek(parseISO(workout.date)) && !isToday(parseISO(workout.date))
-  );
-  
-  const thisMonthWorkouts = filteredWorkouts.filter(
-    (workout) => 
-      isThisMonth(parseISO(workout.date)) && 
-      !isThisWeek(parseISO(workout.date))
-  );
-  
-  const olderWorkouts = filteredWorkouts.filter(
-    (workout) => !isThisMonth(parseISO(workout.date))
-  );
+  // Get workouts for the selected date
+  const todaysWorkouts = selectedDate 
+    ? workouts.filter(workout => {
+        const workoutDate = parseISO(workout.date);
+        return (
+          workoutDate.getDate() === selectedDate.getDate() &&
+          workoutDate.getMonth() === selectedDate.getMonth() &&
+          workoutDate.getFullYear() === selectedDate.getFullYear()
+        );
+      })
+    : [];
 
   const handleEdit = (workout: Workout) => {
     setSelectedWorkout(workout);
     setIsEditDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    deleteWorkout(id);
+  // Extract exercise details from description
+  const parseExerciseDetails = (description: string) => {
+    // Try to extract sets, reps and weight from descriptions like "Back Squat - 5 sets x 15 reps - 30 kg - 10 min"
+    const setsMatch = description.match(/(\d+)\s*sets?\s*x\s*(\d+)\s*reps?/i);
+    const weightMatch = description.match(/(\d+)\s*kg/i);
+    
+    return {
+      sets: setsMatch ? setsMatch[1] : "5",
+      reps: setsMatch ? setsMatch[2] : "15",
+      weight: weightMatch ? weightMatch[1] : "30",
+    };
   };
-
-  const renderWorkoutCard = (workout: Workout) => (
-    <Card key={workout.id} className="mb-4">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg font-semibold">{workout.type}</CardTitle>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleEdit(workout)}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDelete(workout.id)}>
-                <Trash className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardHeader>
-      <CardContent className="pb-2">
-        <p className="text-sm mb-2">{workout.description}</p>
-        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center">
-            <Calendar className="mr-1 h-4 w-4" />
-            {format(parseISO(workout.date), "MMM d, yyyy")}
-          </div>
-          <div className="flex items-center">
-            <Clock className="mr-1 h-4 w-4" />
-            {workout.duration} min
-          </div>
-          <div className="flex items-center">
-            <Flame className="mr-1 h-4 w-4" />
-            {workout.calories} kcal
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
+  
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Workouts</h1>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -143,108 +90,141 @@ const Workouts = () => {
         </Dialog>
       </div>
 
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-        <Input
-          placeholder="Search workouts..."
-          className="pl-10"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-8">
+        {/* Date selector panel */}
+        <div className="bg-white rounded-lg p-6 shadow-sm border">
+          <h2 className="text-lg font-semibold mb-4">Select Date</h2>
+          <div className="calendar-container">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal mb-4",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? format(selectedDate, "MMMM yyyy") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
 
-      <Tabs defaultValue="all">
-        <TabsList className="mb-4">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="today">Today</TabsTrigger>
-          <TabsTrigger value="week">This Week</TabsTrigger>
-          <TabsTrigger value="month">This Month</TabsTrigger>
-        </TabsList>
+            <div className="mt-2 calendar-navigation flex justify-between items-center mb-2">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => {
+                  if (selectedDate) {
+                    const prevDay = new Date(selectedDate);
+                    prevDay.setDate(prevDay.getDate() - 1);
+                    setSelectedDate(prevDay);
+                  }
+                }}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm font-medium">
+                {selectedDate ? format(selectedDate, "MMMM d, yyyy") : "Select a date"}
+                {selectedDate && isToday(selectedDate) && (
+                  <span className="ml-2 text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">Today</span>
+                )}
+              </span>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => {
+                  if (selectedDate) {
+                    const nextDay = new Date(selectedDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    setSelectedDate(nextDay);
+                  }
+                }}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
 
-        <TabsContent value="all">
-          {filteredWorkouts.length === 0 ? (
-            <div className="text-center py-10">
+        {/* Workouts display */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4">
+            {selectedDate 
+              ? `${isToday(selectedDate) ? "Today's" : format(selectedDate, "MMMM d")} Workouts` 
+              : "Workouts"}
+          </h2>
+          
+          {todaysWorkouts.length === 0 ? (
+            <div className="text-center py-10 bg-white rounded-lg border shadow-sm">
               <Dumbbell className="mx-auto h-10 w-10 text-muted-foreground mb-3" />
               <h3 className="font-medium">No workouts found</h3>
               <p className="text-muted-foreground mb-4">
-                Try a different search term or add a new workout
+                {isToday(selectedDate || new Date()) 
+                  ? "Add your workout for today" 
+                  : `Add a workout for ${format(selectedDate || new Date(), "MMM d")}`}
               </p>
               <Button
-                variant="outline"
                 onClick={() => setIsAddDialogOpen(true)}
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Add Your First Workout
+                Add Workout
               </Button>
             </div>
           ) : (
-            filteredWorkouts.map(renderWorkoutCard)
-          )}
-        </TabsContent>
-
-        <TabsContent value="today">
-          {todayWorkouts.length === 0 ? (
-            <div className="text-center py-10">
-              <Dumbbell className="mx-auto h-10 w-10 text-muted-foreground mb-3" />
-              <h3 className="font-medium">No workouts for today</h3>
-              <p className="text-muted-foreground mb-4">
-                Start your day with a new workout
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => setIsAddDialogOpen(true)}
-              >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Today's Workout
-              </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {todaysWorkouts.map((workout) => {
+                const { sets, reps, weight } = parseExerciseDetails(workout.description);
+                
+                return (
+                  <Card key={workout.id} className="overflow-hidden border hover:shadow-md transition-shadow">
+                    <CardContent className="p-0">
+                      <div className="px-4 py-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <Badge 
+                              variant="outline" 
+                              className="mb-2 bg-blue-50 text-blue-600 hover:bg-blue-50 border-blue-100"
+                            >
+                              #{workout.type}
+                            </Badge>
+                            <h3 className="text-lg font-semibold">{workout.type}</h3>
+                            <p className="text-sm text-gray-500 mt-1">Count: {sets} sets x {reps} reps</p>
+                          </div>
+                          <div className="flex">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(workout)}>
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border-t px-4 py-3 bg-gray-50 flex justify-between">
+                        <div className="flex items-center">
+                          <Dumbbell className="mr-2 h-4 w-4 text-gray-500" /> 
+                          <span className="text-sm">{weight} kg</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Clock className="mr-2 h-4 w-4 text-gray-500" />
+                          <span className="text-sm">{workout.duration} min</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
-          ) : (
-            todayWorkouts.map(renderWorkoutCard)
           )}
-        </TabsContent>
-
-        <TabsContent value="week">
-          {thisWeekWorkouts.length === 0 ? (
-            <div className="text-center py-10">
-              <Dumbbell className="mx-auto h-10 w-10 text-muted-foreground mb-3" />
-              <h3 className="font-medium">No workouts this week</h3>
-              <p className="text-muted-foreground mb-4">
-                Add some workouts to your weekly routine
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => setIsAddDialogOpen(true)}
-              >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add This Week's Workout
-              </Button>
-            </div>
-          ) : (
-            thisWeekWorkouts.map(renderWorkoutCard)
-          )}
-        </TabsContent>
-
-        <TabsContent value="month">
-          {thisMonthWorkouts.length === 0 ? (
-            <div className="text-center py-10">
-              <Dumbbell className="mx-auto h-10 w-10 text-muted-foreground mb-3" />
-              <h3 className="font-medium">No workouts this month</h3>
-              <p className="text-muted-foreground mb-4">
-                Start building your monthly workout history
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => setIsAddDialogOpen(true)}
-              >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add A Workout
-              </Button>
-            </div>
-          ) : (
-            thisMonthWorkouts.map(renderWorkoutCard)
-          )}
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-md">
