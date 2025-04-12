@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useWorkout, Workout } from "@/contexts/WorkoutContext";
 import {
@@ -30,7 +29,7 @@ import {
   MoreVertical, 
   Calendar, 
   Clock, 
-  Fire, 
+  Flame, 
   Search, 
   Dumbbell, 
   PlusCircle 
@@ -45,7 +44,6 @@ const Workouts = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  // Filter and sort workouts
   const filteredWorkouts = workouts
     .filter(
       (workout) =>
@@ -54,7 +52,6 @@ const Workouts = () => {
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  // Split workouts by time period
   const todayWorkouts = filteredWorkouts.filter((workout) =>
     isToday(parseISO(workout.date))
   );
@@ -118,7 +115,7 @@ const Workouts = () => {
             {workout.duration} min
           </div>
           <div className="flex items-center">
-            <Fire className="mr-1 h-4 w-4" />
+            <Flame className="mr-1 h-4 w-4" />
             {workout.calories} kcal
           </div>
         </div>
@@ -249,7 +246,6 @@ const Workouts = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
