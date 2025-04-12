@@ -1,7 +1,8 @@
+
 import React from "react";
 import { useWorkout } from "@/contexts/WorkoutContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Flame, Dumbbell, LineChart, Clock, PlusCircle } from "lucide-react";
+import { Fire, Dumbbell, LineChart, Clock, PlusCircle } from "lucide-react";
 import WorkoutForm from "@/components/WorkoutForm";
 import { Button } from "@/components/ui/button";
 import { 
@@ -23,6 +24,7 @@ const Dashboard = () => {
   const { toast } = useToast();
   const today = new Date().setHours(0, 0, 0, 0);
 
+  // Calculate summary stats
   const todaysWorkouts = workouts.filter(
     (workout) => new Date(workout.date).setHours(0, 0, 0, 0) === today
   );
@@ -38,6 +40,7 @@ const Dashboard = () => {
     ? Math.round(totalCaloriesToday / workoutCountToday)
     : 0;
 
+  // Prepare data for pie chart
   const typeCount: Record<string, number> = {};
   workouts.forEach((workout) => {
     if (typeCount[workout.type]) {
@@ -52,6 +55,7 @@ const Dashboard = () => {
     value: typeCount[key],
   }));
 
+  // Prepare data for bar chart - last 7 days
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - (6 - i));
@@ -78,6 +82,7 @@ const Dashboard = () => {
         <h1 className="text-3xl font-bold">Dashboard</h1>
       </div>
 
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardContent className="p-6 flex justify-between items-start">
@@ -92,7 +97,7 @@ const Dashboard = () => {
               </p>
             </div>
             <div className="bg-blue-100 p-3 rounded-full">
-              <Flame className="h-6 w-6 text-blue-500" />
+              <Fire className="h-6 w-6 text-blue-500" />
             </div>
           </CardContent>
         </Card>
@@ -133,6 +138,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
+      {/* Charts and Workout Form */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card className="lg:col-span-1">
           <CardHeader>
@@ -226,6 +232,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
+      {/* Recent Workouts Section */}
       <div>
         <h2 className="text-xl font-bold mb-4">Today's Workouts</h2>
         {todaysWorkouts.length === 0 ? (
@@ -253,7 +260,7 @@ const Dashboard = () => {
                       <span>{workout.duration} min</span>
                     </div>
                     <div className="flex items-center">
-                      <Flame className="h-4 w-4 mr-1" />
+                      <Fire className="h-4 w-4 mr-1" />
                       <span>{workout.calories} kcal</span>
                     </div>
                   </div>
