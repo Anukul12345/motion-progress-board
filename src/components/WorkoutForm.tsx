@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -57,7 +56,10 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ workout, onComplete }) => {
       });
     } else {
       addWorkout({
-        ...values,
+        type: values.type,
+        description: values.description,
+        duration: values.duration,
+        calories: values.calories,
         date: new Date().toISOString(),
       });
     }
