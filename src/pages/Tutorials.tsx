@@ -1,8 +1,13 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, Clock, Star } from "lucide-react";
+import { PlayCircle, Clock, Star, ChevronRight } from "lucide-react";
+import { 
+  HoverCard,
+  HoverCardTrigger,
+  HoverCardContent 
+} from "@/components/ui/hover-card";
 
 const tutorialData = [
   {
@@ -12,7 +17,8 @@ const tutorialData = [
     category: "Legs",
     duration: "15 min",
     rating: 4.8,
-    thumbnail: "https://images.unsplash.com/photo-1566241142888-11183cda6e84?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=500"
+    thumbnail: "https://images.unsplash.com/photo-1566241142888-11183cda6e84?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=500",
+    videoUrl: "https://www.youtube.com/embed/bEv6CCg2BC8"
   },
   {
     id: 2,
@@ -21,7 +27,8 @@ const tutorialData = [
     category: "Back",
     duration: "25 min",
     rating: 4.6,
-    thumbnail: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=500"
+    thumbnail: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=500",
+    videoUrl: "https://www.youtube.com/embed/eE7dzM0iexc"
   },
   {
     id: 3,
@@ -30,7 +37,8 @@ const tutorialData = [
     category: "Cardio",
     duration: "20 min",
     rating: 4.9,
-    thumbnail: "https://images.unsplash.com/photo-1601422407692-ec4eeec1d9b3?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=500"
+    thumbnail: "https://images.unsplash.com/photo-1601422407692-ec4eeec1d9b3?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=500",
+    videoUrl: "https://www.youtube.com/embed/ml6cT4AZdqI"
   },
   {
     id: 4,
@@ -39,7 +47,8 @@ const tutorialData = [
     category: "ABS",
     duration: "15 min",
     rating: 4.7,
-    thumbnail: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=500"
+    thumbnail: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=500",
+    videoUrl: "https://www.youtube.com/embed/DHD1-2P94DI"
   },
   {
     id: 5,
@@ -48,7 +57,8 @@ const tutorialData = [
     category: "Chest",
     duration: "10 min",
     rating: 4.5,
-    thumbnail: "https://images.unsplash.com/photo-1598971639058-fab3c3177e85?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=500"
+    thumbnail: "https://images.unsplash.com/photo-1598971639058-fab3c3177e85?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=500",
+    videoUrl: "https://www.youtube.com/embed/IODxDxX7oi4"
   },
   {
     id: 6,
@@ -57,11 +67,25 @@ const tutorialData = [
     category: "Shoulder",
     duration: "12 min",
     rating: 4.6,
-    thumbnail: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=500"
+    thumbnail: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=500",
+    videoUrl: "https://www.youtube.com/embed/3aRpAO6bfvA"
   }
 ];
 
 const Tutorials = () => {
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
+  const handlePlayVideo = (videoUrl: string) => {
+    setSelectedVideo(videoUrl);
+    setIsVideoModalOpen(true);
+  };
+
+  const closeVideoModal = () => {
+    setSelectedVideo(null);
+    setIsVideoModalOpen(false);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
@@ -81,7 +105,12 @@ const Tutorials = () => {
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                <Button variant="secondary" size="sm" className="flex items-center gap-1">
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="flex items-center gap-1"
+                  onClick={() => handlePlayVideo(tutorial.videoUrl)}
+                >
                   <PlayCircle className="h-4 w-4" />
                   Watch Now
                 </Button>
@@ -110,11 +139,45 @@ const Tutorials = () => {
                 <Clock className="h-3 w-3 mr-1" />
                 {tutorial.duration}
               </div>
-              <Button variant="ghost" size="sm">Save</Button>
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                    Save <ChevronRight className="h-3 w-3" />
+                  </Button>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-52">
+                  <p className="text-sm">Save this tutorial to watch later</p>
+                </HoverCardContent>
+              </HoverCard>
             </CardFooter>
           </Card>
         ))}
       </div>
+
+      {isVideoModalOpen && selectedVideo && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={closeVideoModal}>
+          <div className="relative w-full max-w-4xl bg-white rounded-lg" onClick={(e) => e.stopPropagation()}>
+            <Button 
+              variant="outline" 
+              size="icon"
+              className="absolute right-2 top-2 z-10 bg-white/80 hover:bg-white"
+              onClick={closeVideoModal}
+            >
+              ✕
+            </Button>
+            <div className="aspect-video w-full">
+              <iframe 
+                src={selectedVideo} 
+                className="w-full h-full" 
+                title="Tutorial Video" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-8 text-center">
         <Button variant="outline">Load More Tutorials</Button>
