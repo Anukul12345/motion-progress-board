@@ -30,7 +30,7 @@ import {
   MoreVertical, 
   Calendar, 
   Clock, 
-  Fire, 
+  Flame, 
   Search, 
   Dumbbell, 
   PlusCircle 

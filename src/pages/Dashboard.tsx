@@ -1,8 +1,7 @@
-
 import React from "react";
 import { useWorkout } from "@/contexts/WorkoutContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Fire, Dumbbell, LineChart, Clock, PlusCircle } from "lucide-react";
+import { Flame, Dumbbell, LineChart, Clock, PlusCircle } from "lucide-react";
 import WorkoutForm from "@/components/WorkoutForm";
 import { Button } from "@/components/ui/button";
 import { 
@@ -97,7 +96,7 @@ const Dashboard = () => {
               </p>
             </div>
             <div className="bg-blue-100 p-3 rounded-full">
-              <Fire className="h-6 w-6 text-blue-500" />
+              <Flame className="h-6 w-6 text-blue-500" />
             </div>
           </CardContent>
         </Card>
@@ -260,7 +259,7 @@ const Dashboard = () => {
                       <span>{workout.duration} min</span>
                     </div>
                     <div className="flex items-center">
-                      <Fire className="h-4 w-4 mr-1" />
+                      <Flame className="h-4 w-4 mr-1" />
                       <span>{workout.calories} kcal</span>
                     </div>
                   </div>
