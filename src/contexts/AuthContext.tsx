@@ -55,6 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           title: "Login successful",
           description: "Welcome back!",
         });
+        navigate("/dashboard");
       } else {
         throw new Error("Invalid email or password");
       }
@@ -86,6 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Registration successful",
         description: "Welcome to FitTrack!",
       });
+      navigate("/dashboard");
     } catch (error) {
       toast({
         title: "Registration failed",
